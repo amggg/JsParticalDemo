@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        canvas {
+            background-image: url(./img/sky.jpeg);
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="800px" height="500px"></canvas>
+</body>
+<script>
+    var cn = document.getElementById("canvas");
+    var canvas = cn.getContext("2d");
+
+    //定时器是否开启
+    var isOpenInterval = false;
+    var interval;
+    var circlrs = new Array();
+    var raduis = 16;
+
+    cn.onclick = function (e) {
+        var centerX = e.offsetX;
+        var centerY = e.offsetY;
+        var color = getRandomColor();
+        var speed = Math.floor(Math.random() * 2 + 1);
+
+        var onePointSpeed = Math.random() * 0.4 + 0.8;
+        var twoPointSpeed = Math.random() * 0.6 + 1.2;
+
+        console.log(onePointSpeed);
+        console.log(twoPointSpeed);
+
+        var line = new Line(centerX - raduis, centerY + raduis * 2, centerX + raduis, centerY + raduis * 3, centerX, centerY + raduis * 4, false, false, onePointSpeed, twoPointSpeed);
+        var circle = new Cirecle(centerX, centerY, raduis, color, speed, line);
+
+        circlrs.push(circle);
+
+        drawCircle();
+    }
+
+    function drawCircle() {
+        if (!isOpenInterval && circlrs.length > 0) {
+            isOpenInterval = true;
+            interval = setInterval(function () {
+                canvas.clearRect(0, 0, cn.width, cn.height);
+                for (let i = 0; i < circlrs.length; i++) {
+                    let circle = circlrs[i];
+                    let line = circlrs[i].line;
+                    //画一个实心圆
+                    canvas.beginPath();
+                    canvas.shadowBlur = 20;
+                    canvas.shadowOffsetX = 10100;
+                    canvas.shadowOffsetY = 10100;
+                    canvas.fillStyle = circle.color;//填充颜色,默认是黑色
+                    canvas.arc(circle.centerX, circle.centerY, circle.raduis, 0, Math.PI * 2, false);
+                    canvas.fill();//画实心圆
+
+                    canvas.strokeStyle = circle.color;//填充颜色,默认是黑色
+                    canvas.moveTo(circle.centerX, circle.centerY + circle.raduis);
+                    canvas.bezierCurveTo(line.lineOnePointX, line.lineOnePointY, line.lineTwoPointX, line.lineTwoPointY, line.lineEndPointX, line.lineEndPointY)
+                    canvas.stroke();
+
+                    circle.centerY -= circle.speed;
+
+                    //线
+                    line.lineOnePointY = circle.centerY + raduis * 2;
+                    line.lineTwoPointY = circle.centerY + raduis * 3;
+                    line.lineEndPointY = circle.centerY + raduis * 4;
+
+
+                    if (!line.onePointLeftMove) {
+                        line.lineOnePointX += line.onePointSpeed;
+                        if (line.lineOnePointX >= circle.centerX + raduis) {
+                            line.onePointLeftMove = true;
+                        }
+                    } else {
+                        line.lineOnePointX -= line.onePointSpeed;
+                        if (line.lineOnePointX <= circle.centerX - raduis) {
+                            line.onePointLeftMove = false;
+                        }
+                    }
+
+                    if (!line.twoPointLeftMove) {
+                        line.lineTwoPointX += line.twoPointSpeed;
+                        if (line.lineTwoPointX >= circle.centerX + raduis) {
+                            line.twoPointLeftMove = true;
+                        }
+                    } else {
+                        line.lineTwoPointX -= line.twoPointSpeed;
+                        if (line.lineTwoPointX <= circle.centerX - raduis) {
+                            line.twoPointLeftMove = false;
+                        }
+                    }
+
+
+                    if (circle.centerY <= 0 - raduis) {
+                        circlrs.splice(i, 1);
+                    }
+                }
+                if (circlrs.length <= 0) {
+                    isOpenInterval = false;
+                    canvas.clearRect(0, 0, cn.width, cn.height);
+                    clearInterval(interval);
+                }
+            }, 30)
+        }
+    }
+
+
+    //随机获取颜色
+    function getRandomColor() {
+        var r = Math.floor(Math.random() * 256);
+        var g = Math.floor(Math.random() * 256);
+        var b = Math.floor(Math.random() * 256);
+        return "rgb(" + r + ',' + g + ',' + b + ")";
+    }
+
+
+    //圆实体
+    function Cirecle(centerX, centerY, raduis, color, speed, line) {
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.raduis = raduis;
+        this.color = color;
+        this.speed = speed;
+        this.line = line;
+    }
+
+    //线实体
+    function Line(lineOnePointX, lineOnePointY, lineTwoPointX, lineTwoPointY, lineEndPointX, lineEndPointY, onePointLeftMove, twoPointLeftMove, onePointSpeed, twoPointSpeed) {
+        this.lineOnePointX = lineOnePointX;
+        this.lineOnePointY = lineOnePointY;
+        this.lineTwoPointX = lineTwoPointX;
+        this.lineTwoPointY = lineTwoPointY;
+        this.lineEndPointX = lineEndPointX;
+        this.lineEndPointY = lineEndPointY;
+        this.onePointLeftMove = onePointLeftMove;
+        this.twoPointLeftMove = twoPointLeftMove;
+        this.onePointSpeed = onePointSpeed;
+        this.twoPointSpeed = twoPointSpeed;
+    }
+
+</script>
+
+</html>
