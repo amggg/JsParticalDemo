@@ -36,8 +36,8 @@
         var color = getRandomColor();
         var speed = Math.floor(Math.random() * 2 + 1);
 
-        var onePointSpeed = Math.random() * 0.4 + 0.8;
-        var twoPointSpeed = Math.random() * 0.6 + 1.2;
+        var onePointSpeed = 4;
+        var twoPointSpeed = 4;
 
         console.log(onePointSpeed);
         console.log(twoPointSpeed);
@@ -70,6 +70,10 @@
                     canvas.strokeStyle = circle.color;//填充颜色,默认是黑色
                     canvas.moveTo(circle.centerX, circle.centerY + circle.raduis);
                     canvas.bezierCurveTo(line.lineOnePointX, line.lineOnePointY, line.lineTwoPointX, line.lineTwoPointY, line.lineEndPointX, line.lineEndPointY)
+                    canvas.stroke();
+
+                    canvas.moveTo(line.lineEndPointX, line.lineEndPointY);
+                    canvas.lineTo(line.lineOnePointX, circle.centerY + raduis * 4.5);
                     canvas.stroke();
 
                     circle.centerY -= circle.speed;
