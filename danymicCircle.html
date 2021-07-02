@@ -43,7 +43,8 @@
         console.log(twoPointSpeed);
 
         var line = new Line(centerX - raduis, centerY + raduis * 2, centerX + raduis, centerY + raduis * 3, centerX, centerY + raduis * 4, false, false, onePointSpeed, twoPointSpeed);
-        var circle = new Cirecle(centerX, centerY, raduis, color, speed, line);
+        var tailLine = new TailLine(line.lineEndPointX, line.lineEndPointY, line.lineOnePointX, centerY + raduis * 4.5);
+        var circle = new Cirecle(centerX, centerY, raduis, color, speed, line, tailLine);
 
         circlrs.push(circle);
 
@@ -58,6 +59,7 @@
                 for (let i = 0; i < circlrs.length; i++) {
                     let circle = circlrs[i];
                     let line = circlrs[i].line;
+                    let tailLine = circlrs[i].tailLine;
                     //画一个实心圆
                     canvas.beginPath();
                     canvas.shadowBlur = 20;
@@ -72,17 +74,22 @@
                     canvas.bezierCurveTo(line.lineOnePointX, line.lineOnePointY, line.lineTwoPointX, line.lineTwoPointY, line.lineEndPointX, line.lineEndPointY)
                     canvas.stroke();
 
-                    canvas.moveTo(line.lineEndPointX, line.lineEndPointY);
-                    canvas.lineTo(line.lineOnePointX, circle.centerY + raduis * 4.5);
+                    canvas.moveTo(tailLine.startX, tailLine.startY);
+                    canvas.lineTo(tailLine.endX, tailLine.endY);
                     canvas.stroke();
 
                     circle.centerY -= circle.speed;
 
-                    //线
+                    //贝塞尔
                     line.lineOnePointY = circle.centerY + raduis * 2;
                     line.lineTwoPointY = circle.centerY + raduis * 3;
                     line.lineEndPointY = circle.centerY + raduis * 4;
 
+                    //尾线
+                    tailLine.startX = line.lineEndPointX;
+                    tailLine.startY = line.lineEndPointY;
+                    tailLine.endX = line.lineOnePointX;
+                    tailLine.endY = circle.centerY + raduis * 4.5;
 
                     if (!line.onePointLeftMove) {
                         line.lineOnePointX += line.onePointSpeed;
@@ -133,16 +140,17 @@
 
 
     //圆实体
-    function Cirecle(centerX, centerY, raduis, color, speed, line) {
+    function Cirecle(centerX, centerY, raduis, color, speed, line, tailLine) {
         this.centerX = centerX;
         this.centerY = centerY;
         this.raduis = raduis;
         this.color = color;
         this.speed = speed;
         this.line = line;
+        this.tailLine = tailLine;
     }
 
-    //线实体
+    //贝塞尔曲线实体
     function Line(lineOnePointX, lineOnePointY, lineTwoPointX, lineTwoPointY, lineEndPointX, lineEndPointY, onePointLeftMove, twoPointLeftMove, onePointSpeed, twoPointSpeed) {
         this.lineOnePointX = lineOnePointX;
         this.lineOnePointY = lineOnePointY;
@@ -154,6 +162,14 @@
         this.twoPointLeftMove = twoPointLeftMove;
         this.onePointSpeed = onePointSpeed;
         this.twoPointSpeed = twoPointSpeed;
+    }
+
+    //尾线实体
+    function TailLine(startX, startY, endX, endY){
+            this.startX = startX;
+            this.startY = startY;
+            this.endX = endX;
+            this.endY = endY;
     }
 
 </script>
